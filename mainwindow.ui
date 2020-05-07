@@ -22,7 +22,7 @@
   <property name="styleSheet">
    <string notr="true">* {
 	color: #cfcfcf;
-	font-size: 11px;
+	font-size: 12px;
 	font-family: &quot;Microsoft YaHei UI&quot;;
 	background: #38393b;
 	border: none;
@@ -65,7 +65,9 @@ QTabWidget:tab,
 #textTabGroup,
 QMenuBar::item:pressed,
 QMenuBar::item:selected,
- #textTabGroup QTabBar::tab:!selected{
+ #textTabGroup QTabBar::tab:!selected,
+#forderViewGroups,
+QHeaderView::section{
 	background: #262729;
 }
 
@@ -168,8 +170,9 @@ QScrollBar::sub-page{
 	background:  rgba(20,20,20,0);
 }
 
-
-
+QTreeWidget {
+	font-size: 11px;
+}
 
 </string>
   </property>
@@ -320,7 +323,7 @@ QScrollBar::sub-page{
                 <x>0</x>
                 <y>0</y>
                 <width>247</width>
-                <height>343</height>
+                <height>340</height>
                </rect>
               </property>
               <attribute name="label">
@@ -343,7 +346,34 @@ QScrollBar::sub-page{
                 <number>0</number>
                </property>
                <item>
-                <widget class="QTreeView" name="folders"/>
+                <widget class="QGroupBox" name="forderViewGroups">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="title">
+                  <string/>
+                 </property>
+                 <layout class="QVBoxLayout" name="verticalLayout_6">
+                  <property name="spacing">
+                   <number>0</number>
+                  </property>
+                  <property name="leftMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>0</number>
+                  </property>
+                 </layout>
+                </widget>
                </item>
               </layout>
              </widget>
@@ -353,7 +383,7 @@ QScrollBar::sub-page{
                 <x>0</x>
                 <y>0</y>
                 <width>247</width>
-                <height>343</height>
+                <height>340</height>
                </rect>
               </property>
               <attribute name="label">
@@ -761,29 +791,6 @@ QScrollBar::sub-page{
      <height>30</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu">
-    <property name="title">
-     <string>Файл</string>
-    </property>
-    <addaction name="newFile"/>
-    <addaction name="newWindow"/>
-    <addaction name="separator"/>
-    <addaction name="openFile"/>
-    <addaction name="action_6"/>
-    <addaction name="separator"/>
-    <addaction name="save"/>
-    <addaction name="saveAs"/>
-    <addaction name="saveEverything"/>
-    <addaction name="separator"/>
-    <addaction name="autoSave"/>
-    <addaction name="separator"/>
-    <addaction name="reload"/>
-    <addaction name="closeTab"/>
-    <addaction name="closeEverythingTabs"/>
-    <addaction name="closeWindow"/>
-    <addaction name="separator"/>
-    <addaction name="exit"/>
-   </widget>
    <widget class="QMenu" name="menuadad">
     <property name="title">
      <string>Правка</string>
@@ -863,7 +870,37 @@ QScrollBar::sub-page{
      <string>Переход</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Файл</string>
+    </property>
+    <addaction name="newFile"/>
+    <addaction name="newWindow"/>
+    <addaction name="separator"/>
+    <addaction name="openFile"/>
+    <addaction name="action_6"/>
+    <addaction name="separator"/>
+    <addaction name="save"/>
+    <addaction name="saveAs"/>
+    <addaction name="saveEverything"/>
+    <addaction name="separator"/>
+    <addaction name="autoSave"/>
+    <addaction name="separator"/>
+    <addaction name="reload"/>
+    <addaction name="closeTab"/>
+    <addaction name="closeEverythingTabs"/>
+    <addaction name="closeWindow"/>
+    <addaction name="separator"/>
+    <addaction name="exit"/>
+   </widget>
+   <widget class="QMenu" name="menu_8">
+    <property name="title">
+     <string>Проект</string>
+    </property>
+    <addaction name="openDir"/>
+   </widget>
    <addaction name="menu"/>
+   <addaction name="menu_8"/>
    <addaction name="menuadad"/>
    <addaction name="menu_4"/>
    <addaction name="menu_3"/>
@@ -1168,6 +1205,16 @@ QScrollBar::sub-page{
    </property>
    <property name="text">
     <string>Включить/Выключить строку состояния</string>
+   </property>
+  </action>
+  <action name="action_2">
+   <property name="text">
+    <string>Открыть папку как проект</string>
+   </property>
+  </action>
+  <action name="openDir">
+   <property name="text">
+    <string>Открыть папку</string>
    </property>
   </action>
  </widget>

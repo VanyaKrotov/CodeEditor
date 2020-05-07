@@ -3,6 +3,10 @@
 
 #include <QMainWindow>
 #include "tabwidget.h"
+#include <QSettings>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
+#include <QVariant>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -15,7 +19,21 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    // Поля для хранения динамических виджетов
     QList<TabWidget*> tabWidgets;
+    QList<QTreeWidget*> treeWidgets;
+
+    // Методы для работы с динамическими виджетами
+    QTreeWidget * createTreeWidgets();
+    QTabWidget * createTabWidgets();
+
+    void readDirInTreeWidget(const QString dirPath);
+
+    // Методы для работы с настройками
+    QVariant getSettings(const QString key);
+    void setSettings(const QString key, const QVariant value);
+
+
 
 private slots:
     void on_openFile_triggered();
@@ -27,6 +45,8 @@ private slots:
     void on_closeWindow_triggered();
 
     void on_newFile_triggered();
+
+    void on_openDir_triggered();
 
 private:
     Ui::MainWindow *ui;
