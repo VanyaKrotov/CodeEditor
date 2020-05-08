@@ -8,6 +8,13 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow) {
     ui->setupUi(this);
+
+    connect(&fileReadThread, &QThread::started, &fileReader, &FileReader::readFile);
+    connect(&fileReader, &FileReader::endRead, &fileReadThread, &QThread::terminate);
+    connect(&fileReader, &FileReader::setStateReading, this, &MainWindow::setProgressReadFile);
+
+    fileReader.moveToThread(&fileReadThread);
+
 }
 
 MainWindow::~MainWindow() {
@@ -44,14 +51,14 @@ void MainWindow::readDirInTreeWidget(const QString dirPath) {
 
     QTreeWidgetItem * headerItem = new QTreeWidgetItem(treeWidgets.last());
 
-    headerItem->setToolTip(0, dirPath);
-    headerItem->setText(0, dirInfo.fileName());
-    headerItem->setText(1, dirPath);
+    headerItem->setToolTip(NAME_COLUMN, dirPath);
+    headerItem->setText(NAME_COLUMN, dirInfo.fileName());
+    headerItem->setText(PATH_COLUMN, dirPath);
 
     treeWidgets.last()->setHeaderItem(headerItem);
 
     std::function<void(QTreeWidgetItem*)> addChild = [&addChild](QTreeWidgetItem* parent){
-        QDir rootDir(parent->text(1));
+        QDir rootDir(parent->text(PATH_COLUMN));
         rootDir.setFilter(QDir::NoDotAndDotDot | QDir::NoSymLinks | QDir::Dirs | QDir::Files);
         rootDir.setSorting(QDir::Type);
 
@@ -60,9 +67,9 @@ void MainWindow::readDirInTreeWidget(const QString dirPath) {
         foreach(QFileInfo fileInfo, fileInfoList){
             QTreeWidgetItem * item = new QTreeWidgetItem();
 
-            item->setText(0, fileInfo.fileName());
-            item->setText(1, fileInfo.filePath());
-            item->setToolTip(0, fileInfo.filePath());
+            item->setText(NAME_COLUMN, fileInfo.fileName());
+            item->setText(PATH_COLUMN, fileInfo.filePath());
+            item->setToolTip(NAME_COLUMN, fileInfo.filePath());
 
             if(fileInfo.isDir()){
                 addChild(item);
@@ -106,6 +113,12 @@ void MainWindow::on_openDir_triggered() {
         return;
     }
 
+    for(QTreeWidget * treeWidget: treeWidgets){
+        if(treeWidget->headerItem()->text(PATH_COLUMN) == openedDirPath) {
+            return;
+        }
+    }
+
     setSettings("LastOpenedDir", openedDirPath);
 
     createTreeWidgets();
@@ -122,6 +135,9 @@ void MainWindow::on_openFile_triggered() {
     if(tabWidgets.isEmpty()) {
         createTabWidgets();
     }
+
+    fileReader.setProps(filePath, nullptr);
+    fileReadThread.start();
 
     tabWidgets[0]->createTab(filePath);
 }
@@ -141,5 +157,9 @@ void MainWindow::on_closeWindow_triggered() {
 }
 
 void MainWindow::on_newFile_triggered() {
-   tabWidgets[0]->createNewTab();
+    tabWidgets[0]->createNewTab();
+}
+
+void MainWindow::setProgressReadFile(int state){
+    ui->progressBar->setValue(state);
 }

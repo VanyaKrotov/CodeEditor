@@ -2,11 +2,18 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "tabwidget.h"
 #include <QSettings>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 #include <QVariant>
+#include <QThread>
+
+#include "tabwidget.h"
+#include "filereader.h"
+
+
+#define NAME_COLUMN 0
+#define PATH_COLUMN 1
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -37,18 +44,18 @@ public:
 
 private slots:
     void on_openFile_triggered();
-
     void on_closeTab_triggered();
-
     void on_closeEverythingTabs_triggered();
-
     void on_closeWindow_triggered();
-
     void on_newFile_triggered();
-
     void on_openDir_triggered();
+    void setProgressReadFile(int state);
 
 private:
     Ui::MainWindow *ui;
+    QThread fileReadThread;
+    FileReader fileReader;
+
+
 };
 #endif // MAINWINDOW_H

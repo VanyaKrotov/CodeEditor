@@ -353,12 +353,24 @@ QTreeWidget {
                    <height>16777215</height>
                   </size>
                  </property>
+                 <property name="mouseTracking">
+                  <bool>true</bool>
+                 </property>
+                 <property name="tabletTracking">
+                  <bool>true</bool>
+                 </property>
+                 <property name="contextMenuPolicy">
+                  <enum>Qt::DefaultContextMenu</enum>
+                 </property>
                  <property name="title">
                   <string/>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_6">
                   <property name="spacing">
                    <number>0</number>
+                  </property>
+                  <property name="sizeConstraint">
+                   <enum>QLayout::SetNoConstraint</enum>
                   </property>
                   <property name="leftMargin">
                    <number>0</number>
@@ -676,9 +688,6 @@ QTreeWidget {
          </property>
          <property name="textVisible">
           <bool>false</bool>
-         </property>
-         <property name="format">
-          <string notr="true">%p%</string>
          </property>
         </widget>
        </item>

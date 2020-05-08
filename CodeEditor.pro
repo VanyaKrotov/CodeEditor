@@ -17,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     editor.cpp \
+    filereader.cpp \
     linenumberarea.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -26,6 +27,7 @@ SOURCES += \
 
 HEADERS += \
     editor.h \
+    filereader.h \
     linenumberarea.h \
     mainwindow.h \
     message.h \
