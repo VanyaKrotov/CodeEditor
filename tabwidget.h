@@ -13,14 +13,16 @@ class TabWidget: public QTabWidget
 public:
     TabWidget(QWidget *parent = nullptr);
     ~TabWidget();
-    void createTab(QString &filePath);
-    void createNewTab();
-    void closeAllTabs();
+
     TabPage * getCurrentTab();
     QString closeTab(const int &tabIndex);
+    QList<TabPage*> tabs;
+
+    TabPage * createTab(QString filePath);
+    void closeAllTabs();
+
 
 private:
-    QList<TabPage*> tabs;
 
 public slots:
     void closeTab_trigger(const int &tabIndex);

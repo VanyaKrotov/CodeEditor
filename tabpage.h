@@ -4,6 +4,11 @@
 #include <QHBoxLayout>
 #include <QTextEdit>
 #include <QFileInfo>
+#include <QProgressBar>
+#include <QThread>
+
+#include "filereader.h"
+
 
 class TabPage : public QWidget
 {
@@ -11,13 +16,25 @@ class TabPage : public QWidget
 
 public:
     TabPage( QFileInfo *fileInfo, QWidget *parent = nullptr);
+    TabPage( QWidget *parent = nullptr);
     ~TabPage();
+
     bool isSaved;
     QFileInfo * fileinfo;
 
+    void openFile();
+    QString getEditorContent();
+
+public slots:
+    void setProgressReadFile(int value);
+    void setLineFile(QString line);
+    void finishedFileOpen();
+
 private:
     QTextEdit *editor;
-    QPixmap *pixmap;
+    QProgressBar *progressBar;
+    QThread fileReadThread;
+    FileReader fileReader;
 };
 
 #endif // TABPAGE_H

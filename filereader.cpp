@@ -5,39 +5,32 @@ FileReader::FileReader(QObject *parent) : QObject(parent)
 
 }
 
-void FileReader::setProps(QString filePath, QTextEdit *textEdit){
+void FileReader::setProps(QString filePath){
     this->filePath = filePath;
-    this->textEdit = textEdit;
 }
 
 void FileReader::readFile(){
+    QFile file(filePath);
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text) && (file.exists()))
+    {
+        QTextStream stream(&file);
 
-    qDebug() << filePath << endl;
+        stream.setCodec(QTextCodec::codecForName("UTF-8"));
 
-    int i = 0;
-    int maxCount = 70000;
-    while(i++ < maxCount) {
-        qDebug() << i << endl;
+        const int maxCount = file.size() / 2 / 100;
+        int counReadSimbols = 0;
 
-        emit setStateReading((int) (i / (maxCount / 100)));
+        while(!stream.atEnd()){
+            QString line = stream.readLine();
+            counReadSimbols += line.length();
+
+            emit setLineFileReading(line);
+            emit setStateReading(counReadSimbols / maxCount);
+        }
+
+        file.flush();
+        file.close();
     }
 
     emit endRead();
-
-//    QFile file(filePath);
-//    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-//    {
-//        return;
-//    }
-//    QTextStream stream(&file);
-
-//    stream.setCodec(QTextCodec::codecForName("UTF-8"));
-
-
-////    this->codeedit->setPlainText(stream.readAll());
-////    this->fileinfo = new QFileInfo(path);
-////    this->type = fileinfo->fileName().split('.').last();
-////    this->IsSaved = true;
-//    file.flush();
-//    file.close();
 }

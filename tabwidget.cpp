@@ -21,11 +21,11 @@ void TabWidget::closeTab_trigger(const int &tabIndex) {
 }
 
 QString TabWidget::closeTab(const int &tabIndex){
-    if(!tabs.length()) {
+    if(tabs.isEmpty()) {
        return nullptr;
     }
 
-    if(!tabs[tabIndex]->isSaved){
+    if(!tabs[tabIndex]->isSaved || tabs[tabIndex]->getEditorContent().length()){
         int response =
                 QMessageBox::warning(this,
                                      tr("Сохранение файла"),
@@ -38,6 +38,7 @@ QString TabWidget::closeTab(const int &tabIndex){
               break;
           case QMessageBox::Discard:
             qDebug() << "Discard" << endl;
+
               break;
           case QMessageBox::Cancel:
                 return nullptr;
@@ -46,7 +47,7 @@ QString TabWidget::closeTab(const int &tabIndex){
         }
     }
 
-    QString closedFilePath = tabs[tabIndex]->fileinfo->filePath();
+    QString pathClosedFile = tabs[tabIndex]->fileinfo ? tabs[tabIndex]->fileinfo->filePath() : nullptr;
 
     try {
         removeTab(tabIndex);
@@ -55,7 +56,7 @@ QString TabWidget::closeTab(const int &tabIndex){
         return nullptr;
     }
 
-    return closedFilePath;
+    return pathClosedFile;
 }
 
 void TabWidget::closeAllTabs(){
@@ -68,21 +69,23 @@ void TabWidget::closeAllTabs(){
     }
 }
 
-void TabWidget::createTab(QString &filePath){
+TabPage * TabWidget::createTab(QString filePath){
+    QFileInfo * fileInfo = nullptr;
+    QString titleTab = "Undefined";
 
-    QFileInfo *fileInfo = new QFileInfo(filePath);
+    if(!filePath.isEmpty()) {
+        fileInfo = new QFileInfo(filePath);
+        titleTab = fileInfo->fileName();
+    }
 
     TabPage * tabPage = new TabPage(fileInfo, this);
 
     tabs.append(tabPage);
-    addTab(tabPage, fileInfo->fileName());
-}
+    addTab(tabPage, titleTab);
 
-void TabWidget::createNewTab(){
-    TabPage * tabPage = new TabPage(nullptr, this);
+    setCurrentIndex(tabs.length() - 1);
 
-    tabs.append(tabPage);
-    addTab(tabPage, "Новый файл");
+    return tabPage;
 }
 
 TabPage * TabWidget::getCurrentTab(){

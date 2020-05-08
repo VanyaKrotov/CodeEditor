@@ -8,13 +8,6 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow) {
     ui->setupUi(this);
-
-    connect(&fileReadThread, &QThread::started, &fileReader, &FileReader::readFile);
-    connect(&fileReader, &FileReader::endRead, &fileReadThread, &QThread::terminate);
-    connect(&fileReader, &FileReader::setStateReading, this, &MainWindow::setProgressReadFile);
-
-    fileReader.moveToThread(&fileReadThread);
-
 }
 
 MainWindow::~MainWindow() {
@@ -127,25 +120,43 @@ void MainWindow::on_openDir_triggered() {
 }
 
 void MainWindow::on_openFile_triggered() {
+    QString lastOpenedDir = getSettings("LastOpenedDir").toString();
     QString filePath =
             QFileDialog::getOpenFileName(this,
                                          QObject::tr("Выберите документ"),
-                                         QDir::rootPath(), QObject::tr("Все файлы (*.*)"));
+                                         lastOpenedDir,
+                                         QObject::tr("Все файлы (*.*)"));
+
+    if(filePath.isEmpty()) {
+        return;
+    }
+
+
+    for(TabWidget * tabWidget: tabWidgets){
+        for(TabPage * tabPage: tabWidget->tabs){
+            if(tabPage->fileinfo && tabPage->fileinfo->filePath() == filePath){
+                 tabWidgets[0]->setCurrentWidget(tabPage);
+
+                 return;
+            }
+        }
+    }
 
     if(tabWidgets.isEmpty()) {
         createTabWidgets();
     }
 
-    fileReader.setProps(filePath, nullptr);
-    fileReadThread.start();
-
-    tabWidgets[0]->createTab(filePath);
+    tabWidgets[0]->createTab(filePath)->openFile();
 }
 
 void MainWindow::on_closeTab_triggered() {
     const int closedTabIndex = tabWidgets[0]->currentIndex();
 
-    tabWidgets[0]->closeTab(closedTabIndex);
+    QString pathClosedFile = tabWidgets[0]->closeTab(closedTabIndex);
+
+    if(!pathClosedFile.isEmpty()) {
+        setSettings("LastClosedFile", pathClosedFile);
+    }
 }
 
 void MainWindow::on_closeEverythingTabs_triggered() {
@@ -157,9 +168,19 @@ void MainWindow::on_closeWindow_triggered() {
 }
 
 void MainWindow::on_newFile_triggered() {
-    tabWidgets[0]->createNewTab();
+    if(tabWidgets.isEmpty()) {
+        createTabWidgets();
+    }
+
+    for(TabPage * tabPage: tabWidgets[0]->tabs){
+        if(!tabPage->fileinfo){
+             tabWidgets[0]->setCurrentWidget(tabPage);
+
+             return;
+        }
+    }
+
+    tabWidgets[0]->createTab("");
 }
 
-void MainWindow::setProgressReadFile(int state){
-    ui->progressBar->setValue(state);
-}
+

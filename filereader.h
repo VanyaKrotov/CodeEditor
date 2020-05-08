@@ -14,16 +14,16 @@ class FileReader : public QObject
 
 public:
     explicit FileReader(QObject *parent = nullptr);
-    void setProps(QString filePath, QTextEdit *textEdit);
+    void setProps(QString filePath);
 
     QString filePath;
-    QTextEdit *textEdit;
 
 public slots:
     void readFile();
 
 signals:
     void setStateReading(int state);
+    void setLineFileReading(QString textLine);
     void endRead();
 
 };

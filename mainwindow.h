@@ -6,10 +6,8 @@
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 #include <QVariant>
-#include <QThread>
 
 #include "tabwidget.h"
-#include "filereader.h"
 
 
 #define NAME_COLUMN 0
@@ -49,12 +47,9 @@ private slots:
     void on_closeWindow_triggered();
     void on_newFile_triggered();
     void on_openDir_triggered();
-    void setProgressReadFile(int state);
 
 private:
     Ui::MainWindow *ui;
-    QThread fileReadThread;
-    FileReader fileReader;
 
 
 };

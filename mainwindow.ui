@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>814</width>
-    <height>479</height>
+    <width>989</width>
+    <height>595</height>
    </rect>
   </property>
   <property name="font">
@@ -69,6 +69,15 @@ QMenuBar::item:selected,
 #forderViewGroups,
 QHeaderView::section{
 	background: #262729;
+}
+
+#textTabGroup QProgressBar{
+	max-height: 4px;
+	background: #38393b;
+}
+
+#textTabGroup QProgressBar::chunk {
+	background:  #252A44;
 }
 
 QProgressBar::chunk{
@@ -323,7 +332,7 @@ QTreeWidget {
                 <x>0</x>
                 <y>0</y>
                 <width>247</width>
-                <height>340</height>
+                <height>456</height>
                </rect>
               </property>
               <attribute name="label">
@@ -394,8 +403,8 @@ QTreeWidget {
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>247</width>
-                <height>340</height>
+                <width>83</width>
+                <height>51</height>
                </rect>
               </property>
               <attribute name="label">
@@ -796,7 +805,7 @@ QTreeWidget {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>814</width>
+     <width>989</width>
      <height>30</height>
     </rect>
    </property>
