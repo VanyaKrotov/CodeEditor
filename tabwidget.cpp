@@ -6,18 +6,39 @@ TabWidget::TabWidget(QWidget *parent): QTabWidget(parent) {
     setMovable(true);
 
     connect(this, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab_trigger(int)));
+    connect(tabBar(), &QTabBar::tabMoved, this, &TabWidget::tabMoved);
 }
 
 TabWidget::~TabWidget(){
     if(!tabs.length()) {
        return;
     }
+
+    for(TabPage * tabPage: tabs){
+        tabPage->destroyed();
+    }
 }
 
 void TabWidget::closeTab_trigger(const int &tabIndex) {
     QString closedFilePath = closeTab(tabIndex);
 
-    qDebug() << "close file with" << closedFilePath << endl;
+    if(!closedFilePath.isEmpty()) {
+        QSettings settings(CONFIGURATION_FILE, QSettings::IniFormat);
+
+        settings.setValue("LastClosedFile", closedFilePath);
+    }
+}
+
+void TabWidget::removeTabInWidget() {
+
+}
+
+void TabWidget::updateTabData(TabPage *tab) {
+    setTabText(tabs.indexOf(tab), tab->fileinfo->fileName());
+}
+
+void TabWidget::tabMoved(const int from, const int to) {
+    tabs.swapItemsAt(from, to);
 }
 
 QString TabWidget::closeTab(const int &tabIndex){
@@ -25,7 +46,7 @@ QString TabWidget::closeTab(const int &tabIndex){
        return nullptr;
     }
 
-    if(!tabs[tabIndex]->isSaved || tabs[tabIndex]->getEditorContent().length()){
+    if(!tabs[tabIndex]->isSaved){
         int response =
                 QMessageBox::warning(this,
                                      tr("Сохранение файла"),
@@ -33,17 +54,14 @@ QString TabWidget::closeTab(const int &tabIndex){
                                      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save);
         switch (response) {
           case QMessageBox::Save:
-            qDebug() << "save" << endl;
-//              tabs[tabIndex]->SaveFile("");
-              break;
+//              tabs[tabIndex]->saveFile(SAVE); // todo Ошибка с синхронизацией потоков при удалении
+            break;
           case QMessageBox::Discard:
-            qDebug() << "Discard" << endl;
-
-              break;
+            break;
           case QMessageBox::Cancel:
                 return nullptr;
           default:
-              break;
+            break;
         }
     }
 
@@ -51,6 +69,8 @@ QString TabWidget::closeTab(const int &tabIndex){
 
     try {
         removeTab(tabIndex);
+
+        delete tabs[tabIndex];
         tabs.removeAt(tabIndex);
     } catch (...) {
         return nullptr;
@@ -80,6 +100,9 @@ TabPage * TabWidget::createTab(QString filePath){
 
     TabPage * tabPage = new TabPage(fileInfo, this);
 
+    connect(tabPage, &TabPage::updateTabData, this, &TabWidget::updateTabData);
+    connect(tabPage->getTextEditor(), &TextEditor::changeCursorPosition, this, &TabWidget::setStatusBarData);
+
     tabs.append(tabPage);
     addTab(tabPage, titleTab);
 
@@ -95,3 +118,5 @@ TabPage * TabWidget::getCurrentTab(){
 
     return tabs[currentIndex()];
 }
+
+

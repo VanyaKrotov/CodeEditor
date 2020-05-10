@@ -1,7 +1,6 @@
 #include "filereader.h"
 
-FileReader::FileReader(QObject *parent) : QObject(parent)
-{
+FileReader::FileReader(QObject *parent) : QObject(parent) {
 
 }
 
@@ -17,16 +16,17 @@ void FileReader::readFile(){
 
         stream.setCodec(QTextCodec::codecForName("UTF-8"));
 
-        const int maxCount = file.size() / 2 / 100;
-        int counReadSimbols = 0;
+//        const int maxCount = file.size() / 2 / 100;
+//        int counReadSimbols = 0;
 
-        while(!stream.atEnd()){
-            QString line = stream.readLine();
-            counReadSimbols += line.length();
+        emit setLineFileReading(stream.readAll());
+//        while(!stream.atEnd()){
+//            QString line = stream.readLine();
+//            counReadSimbols += line.length();
 
-            emit setLineFileReading(line);
-            emit setStateReading(counReadSimbols / maxCount);
-        }
+//            emit setLineFileReading(line);
+//            emit setStateReading(counReadSimbols / maxCount);
+//        }
 
         file.flush();
         file.close();

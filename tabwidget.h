@@ -3,8 +3,15 @@
 
 #include <QTabWidget>
 #include <QMessageBox>
-#include "tabpage.h"
+#include <QTabBar>
 
+
+#include "tabpage.h"
+#include "texteditor.h"
+
+#define CONFIGURATION_FILE "configurations.conf"
+#define SAVE false
+#define SAVE_AS true
 
 class TabWidget: public QTabWidget
 {
@@ -22,10 +29,14 @@ public:
     void closeAllTabs();
 
 
-private:
+signals:
+    void setStatusBarData(const int col, const int row, const int select);
 
 public slots:
     void closeTab_trigger(const int &tabIndex);
+    void removeTabInWidget();
+    void updateTabData(TabPage * tab);
+    void tabMoved(const int from, const int to);
 };
 
 #endif // TABWIDGET_H

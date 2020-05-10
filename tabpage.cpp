@@ -4,8 +4,8 @@ TabPage::TabPage(QFileInfo *fileInfo, QWidget *parent) : QWidget(parent) {
     setLayout(new QVBoxLayout(this));
     layout()->setMargin(0);
 
-    editor = new QTextEdit(this);
-    editor->setObjectName("cod" + this->parent()->objectName());
+    editor = new TextEditor(&isSaved, this);
+
     editor->setFocus();
 
     progressBar = new QProgressBar(this);
@@ -24,7 +24,14 @@ TabPage::TabPage(QFileInfo *fileInfo, QWidget *parent) : QWidget(parent) {
     connect(&fileReader, &FileReader::setStateReading, this, &TabPage::setProgressReadFile);
     connect(&fileReader, &FileReader::setLineFileReading, this, &TabPage::setLineFile);
 
+    connect(&fileWriteThread, &QThread::started, &fileWriter, &FileWriter::writeFile);
+    connect(&fileWriter, &FileWriter::endWrite, &fileWriteThread, &QThread::terminate);
+    connect(&fileWriter, &FileWriter::endWrite, this, &TabPage::finishedFileSave);
+    connect(&fileWriter, &FileWriter::endWrite, this, &TabPage::endSave);
+
+
     fileReader.moveToThread(&fileReadThread);
+    fileWriter.moveToThread(&fileWriteThread);
 }
 
 TabPage::~TabPage(){
@@ -43,15 +50,43 @@ QString TabPage::getEditorContent(){
     return editor->toPlainText();
 }
 
+TextEditor *TabPage::getTextEditor() {
+    return editor;
+}
+
 void TabPage::openFile(){
-    editor->hide();
+    editor->setDisabled(true);
 
     fileReader.setProps(fileinfo->filePath());
     fileReadThread.start();
 }
 
+void TabPage::saveFile(const bool saveType) {
+    QString filePath;
+    QSettings settings(CONFIGURATION_FILE, QSettings::IniFormat);
+    QString lastOpenedDir = settings.value("LastOpenedDir").toString();
+
+    if(saveType == SAVE_AS || !fileinfo) {
+        filePath = QFileDialog::getSaveFileName(this,
+                                                QObject::tr("Укажите путь и имя файла"),
+                                                lastOpenedDir + "/" + editor->toPlainText().split(" ")[0],
+                                                QObject::tr("Файл (*.txt);;Все файлы (*.*)"));
+    } else {
+        filePath = fileinfo->filePath();
+    }
+
+    if(filePath.isEmpty()) {
+        return;
+    }
+
+    editor->setDisabled(true);
+
+    fileWriter.setProps(editor, filePath);
+    fileWriteThread.start();
+}
+
 void TabPage::setLineFile(QString line){
-    editor->append(line);
+    editor->setPlainText(line);
 }
 
 void TabPage::setProgressReadFile(int value){
@@ -59,9 +94,17 @@ void TabPage::setProgressReadFile(int value){
 }
 
 void TabPage::finishedFileOpen(){
-    editor->show();
+    editor->setDisabled(false);
     editor->moveCursor(QTextCursor::Start);
-
     progressBar->hide();
 }
 
+void TabPage::finishedFileSave(QString pathSaved){
+    editor->setDisabled(false);
+    editor->setFocus();
+
+    fileinfo = new QFileInfo(pathSaved);
+    isSaved = true;
+
+    emit updateTabData(this);
+}
