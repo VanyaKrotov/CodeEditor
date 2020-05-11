@@ -23,8 +23,8 @@ public:
     ~TextEditor();
 
 protected:
-//    void focusInEvent(QFocusEvent *e);
-//    void focusOutEvent(QFocusEvent *e);
+    void focusInEvent(QFocusEvent *e);
+    void focusOutEvent(QFocusEvent *e);
 
 private:
     bool *isSaved;
@@ -37,6 +37,8 @@ public slots:
 
 signals:
     void changeCursorPosition(const int col, const int row, const int select);
+    void inFocus();
+    void outFocus();
 };
 
 #endif // TEXTEDITOR_H

@@ -26,23 +26,23 @@ public:
     TabPage( QWidget *parent = nullptr);
     ~TabPage();
 
-    bool isSaved;
+    bool isSaved = true;
+    bool savingInProgress = false;
     QFileInfo * fileinfo;
 
     void openFile();
     void saveFile(const bool saveType);
+    void asyncSaveFile(const bool saveType);
     QString getEditorContent();
     TextEditor *getTextEditor();
 
 public slots:
-    void setProgressReadFile(int value);
     void setLineFile(QString line);
     void finishedFileOpen();
     void finishedFileSave(QString pathSaved);
 
 private:
     TextEditor *editor;
-    QProgressBar *progressBar;
 
     QThread fileReadThread;
     FileReader fileReader;

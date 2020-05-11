@@ -9,10 +9,21 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow) {
     ui->setupUi(this); 
 
+    if(!getSettings("SettingsIsInstall").toBool()) {
+        setDefaultSettings();
+    }
 
     const bool isShowStatusBar = getSettings("IsShowStatusBar").toBool();
     const bool isShowSideBar = getSettings("IsShowSideBar").toBool();
     const bool isTextWrap = getSettings("IsTextWrap").toBool();
+
+    const int x = getSettings("WindowX").toInt();
+    const int y = getSettings("WindowY").toInt();
+
+    const int windowWidth = getSettings("WindowWidth").toInt();
+    const int windowHeight = getSettings("WindowHeight").toInt();
+
+    setGeometry(x, y, windowWidth, windowHeight);
 
     ui->changeStatusBar->setChecked(isShowStatusBar);
     ui->changeSideBar->setChecked(isShowSideBar);
@@ -20,7 +31,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     setStateStatusBar(isShowStatusBar);
     setStateSideBar(isShowSideBar);
-
 
     const int sideBarWidth = getSettings("SideBarWidth").toInt();
     if(sideBarWidth) {
@@ -33,6 +43,10 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow() {
     setSettings("SideBarWidth", ui->optionsTabWidget->width());
+    setSettings("WindowWidth", width());
+    setSettings("WindowHeight", height());
+    setSettings("WindowX", x());
+    setSettings("WindowY", y());
 
     delete ui;
 }
@@ -44,6 +58,8 @@ QTreeWidget * MainWindow::createTreeWidgets(){
     treeWidget->headerItem()->setHidden(true);
 
     ui->treeWidgetsSplitter->addWidget(treeWidget);
+
+//    connect(treeWidget, &QTreeWidget::setActive, this, &MainWindow::setActiveTabWidget); // todo переделать на отдельный класс
 
     treeWidgets.append(treeWidget);
 
@@ -59,6 +75,9 @@ QTabWidget * MainWindow::createTabWidgets(){
     tabWidgets.append(tabWidget);
 
     connect(tabWidget, &TabWidget::setStatusBarData, this, &MainWindow::setStatusBarColAndRow);
+    connect(tabWidget, &TabWidget::setActive, this, &MainWindow::setActiveTabWidget);
+
+    setActiveTabWidget(tabWidget);
 
     return tabWidget;
 }
@@ -180,7 +199,7 @@ void MainWindow::on_openFile_triggered() {
     for(TabWidget * tabWidget: tabWidgets){
         for(TabPage * tabPage: tabWidget->tabs){
             if(tabPage->fileinfo && tabPage->fileinfo->filePath() == filePath){
-                 tabWidgets[0]->setCurrentWidget(tabPage);
+                 activeTabWidget->setCurrentWidget(tabPage);
 
                  return;
             }
@@ -191,13 +210,17 @@ void MainWindow::on_openFile_triggered() {
         createTabWidgets();
     }
 
-    tabWidgets[0]->createTab(filePath)->openFile();
+    activeTabWidget->createTab(filePath)->openFile();
 }
 
 void MainWindow::on_closeTab_triggered() {
-    const int closedTabIndex = tabWidgets[0]->currentIndex();
+    const int closedTabIndex = activeTabWidget->currentIndex();
 
-    QString pathClosedFile = tabWidgets[0]->closeTab(closedTabIndex);
+    if(activeTabWidget->getCurrentTab()->savingInProgress) {
+       return;
+    }
+
+    QString pathClosedFile = activeTabWidget->closeTab(closedTabIndex);
 
     if(!pathClosedFile.isEmpty()) {
         setSettings("LastClosedFile", pathClosedFile);
@@ -205,7 +228,7 @@ void MainWindow::on_closeTab_triggered() {
 }
 
 void MainWindow::on_closeEverythingTabs_triggered() {
-    tabWidgets[0]->closeAllTabs();
+    activeTabWidget->closeAllTabs();
 }
 
 void MainWindow::on_closeWindow_triggered() {
@@ -217,15 +240,15 @@ void MainWindow::on_newFile_triggered() {
         createTabWidgets();
     }
 
-    for(TabPage * tabPage: tabWidgets[0]->tabs){
+    for(TabPage * tabPage: activeTabWidget->tabs){
         if(!tabPage->fileinfo){
-             tabWidgets[0]->setCurrentWidget(tabPage);
+             activeTabWidget->setCurrentWidget(tabPage);
 
              return;
         }
     }
 
-    tabWidgets[0]->createTab("");
+    activeTabWidget->createTab("")->getTextEditor()->setFocus();
 }
 
 void MainWindow::on_changeSideBar_toggled(bool value) {
@@ -241,7 +264,7 @@ void MainWindow::on_changeTextWrap_triggered(bool value) {
 }
 
 void MainWindow::on_save_triggered() {
-    tabWidgets[0]->getCurrentTab()->saveFile(SAVE);
+    activeTabWidget->getCurrentTab()->asyncSaveFile(SAVE);
 }
 
 void MainWindow::on_openClosedFile_triggered() {
@@ -255,14 +278,14 @@ void MainWindow::on_openClosedFile_triggered() {
         for(TabWidget * tabWidget: tabWidgets){
             for(TabPage * tabPage: tabWidget->tabs){
                 if(tabPage->fileinfo && tabPage->fileinfo->filePath() == filePath){
-                     tabWidgets[0]->setCurrentWidget(tabPage);
+                     activeTabWidget->setCurrentWidget(tabPage);
 
                      return;
                 }
             }
         }
 
-        tabWidgets[0]->createTab(filePath)->openFile();
+        activeTabWidget->createTab(filePath)->openFile();
     }
 }
 
@@ -280,6 +303,14 @@ void MainWindow::on_exit_triggered() {
     exit(0);
 }
 
+void MainWindow::setActiveTabWidget(TabWidget *activeWidget) {
+    activeTabWidget = activeWidget;
+}
+
+void MainWindow::setActiveTreeWidget(QTreeWidget *activeWidget) {
+    activeTreeWidget = activeWidget;
+}
+
 void MainWindow::setStatusBarColAndRow(const int col, const int row, const int select) {
     QString buttonLabel =
             "Строка: " + QString::number(col) +
@@ -287,4 +318,24 @@ void MainWindow::setStatusBarColAndRow(const int col, const int row, const int s
             (select ? " (выделено: " + QString::number(select) + ")" : "");
 
     ui->cursorStateButton->setText(buttonLabel);
+}
+
+// метод для установки дефолтных настроек
+void MainWindow::setDefaultSettings() {
+   QSettings settings(CONFIGURATION_FILE, QSettings::IniFormat);
+
+   settings.setValue("SettingsIsInstall", true);
+
+   settings.setValue("IsTextWrap", false);
+   settings.setValue("IsShowSideBar", true);
+   settings.setValue("IsShowStatusBar", true);
+
+   settings.setValue("TabWidth", 4);
+   settings.setValue("CursorWidth", 2);
+   settings.setValue("WindowWidth", 900);
+   settings.setValue("WindowHeight", 500);
+   settings.setValue("WindowX", 50);
+   settings.setValue("WindowY", 50);
+
+   settings.setValue("SideBarWidth", 300);
 }

@@ -20,7 +20,6 @@ SOURCES += \
     filewriter.cpp \
     main.cpp \
     mainwindow.cpp \
-    message.cpp \
     tabpage.cpp \
     tabwidget.cpp \
     texteditor.cpp
@@ -29,7 +28,6 @@ HEADERS += \
     filereader.h \
     filewriter.h \
     mainwindow.h \
-    message.h \
     tabpage.h \
     tabwidget.h \
     texteditor.h

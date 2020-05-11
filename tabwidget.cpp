@@ -4,6 +4,7 @@
 TabWidget::TabWidget(QWidget *parent): QTabWidget(parent) {
     setTabsClosable(true);
     setMovable(true);
+    setFocus();
 
     connect(this, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab_trigger(int)));
     connect(tabBar(), &QTabBar::tabMoved, this, &TabWidget::tabMoved);
@@ -54,7 +55,7 @@ QString TabWidget::closeTab(const int &tabIndex){
                                      QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save);
         switch (response) {
           case QMessageBox::Save:
-//              tabs[tabIndex]->saveFile(SAVE); // todo Ошибка с синхронизацией потоков при удалении
+              tabs[tabIndex]->saveFile(SAVE);
             break;
           case QMessageBox::Discard:
             break;
@@ -89,6 +90,11 @@ void TabWidget::closeAllTabs(){
     }
 }
 
+void TabWidget::setActiveThisWidget() {
+    emit setActive(this);
+}
+
+
 TabPage * TabWidget::createTab(QString filePath){
     QFileInfo * fileInfo = nullptr;
     QString titleTab = "Undefined";
@@ -102,6 +108,7 @@ TabPage * TabWidget::createTab(QString filePath){
 
     connect(tabPage, &TabPage::updateTabData, this, &TabWidget::updateTabData);
     connect(tabPage->getTextEditor(), &TextEditor::changeCursorPosition, this, &TabWidget::setStatusBarData);
+    connect(tabPage->getTextEditor(), &TextEditor::inFocus, this, &TabWidget::setActiveThisWidget);
 
     tabs.append(tabPage);
     addTab(tabPage, titleTab);

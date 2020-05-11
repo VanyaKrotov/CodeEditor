@@ -2,6 +2,7 @@
 
 TextEditor::TextEditor(bool *isSaved, QWidget *parent): QPlainTextEdit(parent) {
     this->isSaved = isSaved;
+    setFocus();
 
     QSettings settings(CONFIGURATION_FILE, QSettings::IniFormat);
 
@@ -9,8 +10,8 @@ TextEditor::TextEditor(bool *isSaved, QWidget *parent): QPlainTextEdit(parent) {
     const int sumbolWidth = fontMetrics().horizontalAdvance(QLatin1Char('9'));
     const int tabWidth = sumbolWidth * settings.value("TabWidth").toInt();
 
-    setTabStopWidth(tabWidth ? tabWidth : sumbolWidth * 4);
-    setCursorWidth(cursorWidth < 1 ? 1 : cursorWidth);
+    setTabStopWidth(tabWidth);
+    setCursorWidth(cursorWidth);
 
     connect(this, &TextEditor::cursorPositionChanged, this, &TextEditor::onChangeCursor);
     connect(this, &TextEditor::textChanged, this, &TextEditor::onTextChanged);
@@ -20,6 +21,20 @@ TextEditor::TextEditor(bool *isSaved, QWidget *parent): QPlainTextEdit(parent) {
 
 TextEditor::~TextEditor() {
 
+}
+
+void TextEditor::focusInEvent(QFocusEvent *e) {
+    onChangeCursor();
+    emit inFocus();
+
+    QPlainTextEdit::focusInEvent(e);
+}
+
+void TextEditor::focusOutEvent(QFocusEvent *e) {
+    emit changeCursorPosition(0, 0, 0);
+    emit outFocus();
+
+    QPlainTextEdit::focusOutEvent(e);
 }
 
 CursorState TextEditor::getCursorState() {

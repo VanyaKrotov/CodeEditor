@@ -5,7 +5,6 @@
 #include <QMessageBox>
 #include <QTabBar>
 
-
 #include "tabpage.h"
 #include "texteditor.h"
 
@@ -27,10 +26,11 @@ public:
 
     TabPage * createTab(QString filePath);
     void closeAllTabs();
-
+    void setActiveThisWidget();
 
 signals:
     void setStatusBarData(const int col, const int row, const int select);
+    void setActive(TabWidget * activeWidget);
 
 public slots:
     void closeTab_trigger(const int &tabIndex);

@@ -29,9 +29,37 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+protected:
+//    void changeEvent(QEvent *event);
+
+private slots:
+    void on_openFile_triggered();
+    void on_closeTab_triggered();
+    void on_closeEverythingTabs_triggered();
+    void on_closeWindow_triggered();
+    void on_newFile_triggered();
+    void on_openDir_triggered();
+    void on_changeSideBar_toggled(bool value);
+    void on_changeStatusBar_toggled(bool value);
+    void on_changeTextWrap_triggered(bool value);
+    void on_save_triggered();
+    void on_openClosedFile_triggered();
+    void on_exit_triggered();
+    void setActiveTabWidget(TabWidget * activeWidget);
+    void setActiveTreeWidget(QTreeWidget * activeWidget);
+
+    void setStatusBarColAndRow(const int col, const int row, const int select);
+
+private:
+    Ui::MainWindow *ui;
+    void setDefaultSettings();
     // Поля для хранения динамических виджетов
     QList<TabWidget*> tabWidgets;
     QList<QTreeWidget*> treeWidgets;
+
+    TabWidget * activeTabWidget;
+    QTreeWidget * activeTreeWidget;
 
     // Методы для работы с динамическими виджетами
     QTreeWidget * createTreeWidgets();
@@ -47,25 +75,6 @@ public:
 
     void setStateStatusBar(bool state);
     void setStateSideBar(bool state);
-
-private slots:
-    void on_openFile_triggered();
-    void on_closeTab_triggered();
-    void on_closeEverythingTabs_triggered();
-    void on_closeWindow_triggered();
-    void on_newFile_triggered();
-    void on_openDir_triggered();
-    void on_changeSideBar_toggled(bool value);
-    void on_changeStatusBar_toggled(bool value);
-    void on_changeTextWrap_triggered(bool value);
-    void on_save_triggered();
-    void on_openClosedFile_triggered();
-    void on_exit_triggered();
-
-    void setStatusBarColAndRow(const int col, const int row, const int select);
-
-private:
-    Ui::MainWindow *ui;
 
 };
 #endif // MAINWINDOW_H
