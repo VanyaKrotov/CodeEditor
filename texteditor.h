@@ -19,8 +19,9 @@ class TextEditor: public QPlainTextEdit {
     Q_OBJECT
 
 public:
-    TextEditor(bool *isSaved, QWidget *parent = nullptr);
+    TextEditor(QWidget *parent = nullptr);
     ~TextEditor();
+    void setConnect(QObject *to);
 
 protected:
     void focusInEvent(QFocusEvent *e);
@@ -39,6 +40,7 @@ signals:
     void changeCursorPosition(const int col, const int row, const int select);
     void inFocus();
     void outFocus();
+    void setSaved(const bool value);
 };
 
 #endif // TEXTEDITOR_H

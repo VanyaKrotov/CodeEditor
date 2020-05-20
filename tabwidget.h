@@ -26,7 +26,7 @@ public:
 
     TabPage * createTab(QString filePath);
     void closeAllTabs();
-    void setActiveThisWidget();
+    void openFile(QString path);
 
 signals:
     void setStatusBarData(const int col, const int row, const int select);
@@ -37,6 +37,8 @@ public slots:
     void removeTabInWidget();
     void updateTabData(TabPage * tab);
     void tabMoved(const int from, const int to);
+    void setStatusBarDataSlot(const int col, const int row, const int select);
+    void setActiveThisWidget();
 };
 
 #endif // TABWIDGET_H

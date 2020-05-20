@@ -7,6 +7,7 @@
 #include <QTextCodec>
 #include <QDebug>
 #include <QTextEdit>
+#include "texteditor.h"
 
 class FileReader : public QObject
 {

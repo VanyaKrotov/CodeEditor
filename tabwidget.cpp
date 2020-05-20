@@ -42,6 +42,10 @@ void TabWidget::tabMoved(const int from, const int to) {
     tabs.swapItemsAt(from, to);
 }
 
+void TabWidget::setStatusBarDataSlot(const int col, const int row, const int select) {
+    emit setStatusBarData(col, row, select);
+}
+
 QString TabWidget::closeTab(const int &tabIndex){
     if(tabs.isEmpty()) {
        return nullptr;
@@ -90,6 +94,25 @@ void TabWidget::closeAllTabs(){
     }
 }
 
+void TabWidget::openFile(QString path) {
+    if(path.isEmpty()) {
+        return;
+    }
+
+    QFileInfo *fileinfo = new QFileInfo(path);
+
+    TabPage *tabPage = new TabPage(fileinfo, this);
+
+    tabPage->openFile();
+
+    connect(tabPage, &TabPage::updateTabData, this, &TabWidget::updateTabData);
+
+    tabs.append(tabPage);
+    addTab(tabPage, fileinfo->fileName());
+
+    setCurrentIndex(tabs.length() - 1);
+}
+
 void TabWidget::setActiveThisWidget() {
     emit setActive(this);
 }
@@ -107,8 +130,6 @@ TabPage * TabWidget::createTab(QString filePath){
     TabPage * tabPage = new TabPage(fileInfo, this);
 
     connect(tabPage, &TabPage::updateTabData, this, &TabWidget::updateTabData);
-    connect(tabPage->getTextEditor(), &TextEditor::changeCursorPosition, this, &TabWidget::setStatusBarData);
-    connect(tabPage->getTextEditor(), &TextEditor::inFocus, this, &TabWidget::setActiveThisWidget);
 
     tabs.append(tabPage);
     addTab(tabPage, titleTab);

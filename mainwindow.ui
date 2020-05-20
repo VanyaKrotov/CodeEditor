@@ -10,6 +10,12 @@
     <height>595</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>500</width>
+    <height>300</height>
+   </size>
+  </property>
   <property name="font">
    <font>
     <family>Microsoft YaHei UI</family>
@@ -201,8 +207,9 @@ QSplitter::handle{
 	font-size: 11px;
 }
 
-
-</string>
+#cursorStateButton {
+	text-align: right;
+}	</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -257,7 +264,7 @@ QSplitter::handle{
           <bool>true</bool>
          </property>
          <property name="handleWidth">
-          <number>4</number>
+          <number>2</number>
          </property>
          <property name="childrenCollapsible">
           <bool>true</bool>
@@ -369,8 +376,8 @@ QSplitter::handle{
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>902</width>
-                 <height>457</height>
+                 <width>903</width>
+                 <height>458</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -430,6 +437,9 @@ QSplitter::handle{
                    </property>
                    <item>
                     <widget class="QSplitter" name="treeWidgetsSplitter">
+                     <property name="autoFillBackground">
+                      <bool>false</bool>
+                     </property>
                      <property name="orientation">
                       <enum>Qt::Vertical</enum>
                      </property>
@@ -448,8 +458,8 @@ QSplitter::handle{
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>902</width>
-                 <height>457</height>
+                 <width>903</width>
+                 <height>458</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -708,7 +718,7 @@ QSplitter::handle{
           </size>
          </property>
          <property name="text">
-          <string>active</string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -727,7 +737,7 @@ QSplitter::handle{
           </size>
          </property>
          <property name="text">
-          <string>s</string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -746,7 +756,7 @@ QSplitter::handle{
           </font>
          </property>
          <property name="text">
-          <string>info label</string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -764,7 +774,7 @@ QSplitter::handle{
         <widget class="QPushButton" name="cursorStateButton">
          <property name="minimumSize">
           <size>
-           <width>150</width>
+           <width>200</width>
            <height>0</height>
           </size>
          </property>
@@ -872,7 +882,7 @@ QSplitter::handle{
      <x>0</x>
      <y>0</y>
      <width>989</width>
-     <height>30</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuadad">
@@ -958,18 +968,12 @@ QSplitter::handle{
     <property name="title">
      <string>Файл</string>
     </property>
-    <widget class="QMenu" name="menu_9">
-     <property name="title">
-      <string>Открыть последние</string>
-     </property>
-     <addaction name="openClosedFile"/>
-    </widget>
     <addaction name="newFile"/>
     <addaction name="newWindow"/>
     <addaction name="separator"/>
     <addaction name="openFile"/>
     <addaction name="action_6"/>
-    <addaction name="menu_9"/>
+    <addaction name="openClosedFile"/>
     <addaction name="separator"/>
     <addaction name="save"/>
     <addaction name="saveAs"/>
@@ -1313,7 +1317,7 @@ QSplitter::handle{
   </action>
   <action name="openClosedFile">
    <property name="text">
-    <string>Повторно открыть закрытый файл</string>
+    <string>Открыть закрытый файл</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+T</string>

@@ -30,8 +30,16 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    TabPage *checkOpenedFileInWidgets(QString filePath);
+
+    void openFileInWidgets(QString filePath);
+    void saveEverythingFiles();
+    QString getLastClosedFile();
+    void setLastClosedFile(QString filePath);
+
 protected:
 //    void changeEvent(QEvent *event);
+    bool event(QEvent * e);
 
 private slots:
     void on_openFile_triggered();
@@ -48,8 +56,11 @@ private slots:
     void on_exit_triggered();
     void setActiveTabWidget(TabWidget * activeWidget);
     void setActiveTreeWidget(QTreeWidget * activeWidget);
-
     void setStatusBarColAndRow(const int col, const int row, const int select);
+    void on_saveAs_triggered();
+    void on_autoSave_triggered(bool checked);
+
+    void on_saveEverything_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -58,12 +69,12 @@ private:
     QList<TabWidget*> tabWidgets;
     QList<QTreeWidget*> treeWidgets;
 
-    TabWidget * activeTabWidget;
-    QTreeWidget * activeTreeWidget;
+    TabWidget * activeTabWidget = nullptr;
+    QTreeWidget * activeTreeWidget = nullptr;
 
     // Методы для работы с динамическими виджетами
     QTreeWidget * createTreeWidgets();
-    QTabWidget * createTabWidgets();
+    TabWidget * createTabWidgets();
 
     void readDirInTreeWidget(const QString dirPath);
 

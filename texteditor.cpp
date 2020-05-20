@@ -1,7 +1,6 @@
 #include "texteditor.h"
 
-TextEditor::TextEditor(bool *isSaved, QWidget *parent): QPlainTextEdit(parent) {
-    this->isSaved = isSaved;
+TextEditor::TextEditor(QWidget *parent): QPlainTextEdit(parent) {
     setFocus();
 
     QSettings settings(CONFIGURATION_FILE, QSettings::IniFormat);
@@ -15,6 +14,10 @@ TextEditor::TextEditor(bool *isSaved, QWidget *parent): QPlainTextEdit(parent) {
 
     connect(this, &TextEditor::cursorPositionChanged, this, &TextEditor::onChangeCursor);
     connect(this, &TextEditor::textChanged, this, &TextEditor::onTextChanged);
+
+    connect(this, SIGNAL(changeCursorPosition(int, int, int)), parent->parent(), SLOT(setStatusBarDataSlot(int, int, int)));
+    connect(this, SIGNAL(inFocus()), parent->parent(), SLOT(setActiveThisWidget()));
+    connect(this, SIGNAL(setSaved(const bool)), parent, SLOT(setSaved(const bool)));
 
     emit changeCursorPosition(0, 0, 0);
 }
@@ -55,7 +58,7 @@ void TextEditor::onChangeCursor() {
 }
 
 void TextEditor::onTextChanged() {
-    *isSaved = false;
+    emit setSaved(false);
 }
 
 

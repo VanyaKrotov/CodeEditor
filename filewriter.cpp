@@ -14,8 +14,9 @@ void FileWriter::writeFile() {
 
     if(file.open(QIODevice::WriteOnly | QIODevice::Text)){
         QTextStream writeStream(&file);
+//          QTextCodec *codec = writeStream.codec();
 
-        writeStream.setCodec(QTextCodec::codecForName("UTF-8"));
+//        writeStream.setCodec(QTextCodec::codecForName(codec));
 
         writeStream << textEditor->toPlainText();
 

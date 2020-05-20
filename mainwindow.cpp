@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     const bool isShowStatusBar = getSettings("IsShowStatusBar").toBool();
     const bool isShowSideBar = getSettings("IsShowSideBar").toBool();
     const bool isTextWrap = getSettings("IsTextWrap").toBool();
+    const bool onAutoSave = getSettings("OnAutoSave").toBool();
 
     const int x = getSettings("WindowX").toInt();
     const int y = getSettings("WindowY").toInt();
@@ -28,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->changeStatusBar->setChecked(isShowStatusBar);
     ui->changeSideBar->setChecked(isShowSideBar);
     ui->changeTextWrap->setChecked(isTextWrap);
+    ui->autoSave->setChecked(onAutoSave);
 
     setStateStatusBar(isShowStatusBar);
     setStateSideBar(isShowSideBar);
@@ -51,6 +53,96 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
+TabPage *MainWindow::checkOpenedFileInWidgets(QString filePath) {
+    for(TabWidget * tabWidget: tabWidgets){
+        for(TabPage * tabPage: tabWidget->tabs){
+            if(tabPage->fileinfo && tabPage->fileinfo->filePath() == filePath){
+                return tabPage;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+void MainWindow::openFileInWidgets(QString filePath) {
+    if(filePath.isEmpty()) {
+        return;
+    }
+
+    if(tabWidgets.isEmpty()) {
+        createTabWidgets();
+    }
+
+    TabPage *tabWithOpenFile = checkOpenedFileInWidgets(filePath);
+
+    if(tabWithOpenFile) {
+        activeTabWidget->setCurrentWidget(tabWithOpenFile);
+
+        return;
+    }
+
+    activeTabWidget->createTab(filePath)->openFile();
+}
+
+void MainWindow::saveEverythingFiles() {
+    if(!tabWidgets.isEmpty()) {
+        for(TabWidget * tabWidget: tabWidgets){
+            for(TabPage * tabPage: tabWidget->tabs){
+                if(!tabPage->isSaved){
+                    activeTabWidget = tabWidget;
+                    tabWidget->setCurrentWidget(tabPage);
+                    tabPage->saveFile(SAVE);
+                }
+            }
+        }
+    }
+}
+
+QString MainWindow::getLastClosedFile() {
+    QList<QVariant> listClosedFiles = getSettings("LastOpenedTab").toList();
+    if(listClosedFiles.isEmpty()) {
+        return nullptr;
+    }
+
+    QString filePath = listClosedFiles.last().toString();
+    listClosedFiles.removeLast();
+
+    setSettings("LastOpenedTab", listClosedFiles);
+
+    return filePath;
+}
+
+void MainWindow::setLastClosedFile(QString filePath) {
+    QList<QVariant> listClosedFiles = getSettings("LastOpenedTab").toList();
+
+    listClosedFiles.append(filePath);
+
+    setSettings("LastOpenedTab", listClosedFiles);
+}
+
+bool MainWindow::event(QEvent * e) {
+    switch(e->type()) {
+        case QEvent::WindowActivate :
+            // todo сделать проверку файлов на изменения
+
+           break;
+
+        case QEvent::WindowDeactivate :
+            if(getSettings("OnAutoSave").toBool() && activeTabWidget) {
+                if(activeTabWidget->getCurrentTab()->fileinfo) {
+                    activeTabWidget->getCurrentTab()->saveFile(SAVE);
+                }
+            }
+
+            break;
+        default:
+            break;
+    }
+
+    return QMainWindow::event(e) ;
+}
+
 // Методы для работы с динамическими виджетами
 QTreeWidget * MainWindow::createTreeWidgets(){
     QTreeWidget * treeWidget = new QTreeWidget(ui->forderViewGroups);
@@ -66,7 +158,7 @@ QTreeWidget * MainWindow::createTreeWidgets(){
     return treeWidget;
 }
 
-QTabWidget * MainWindow::createTabWidgets(){
+TabWidget * MainWindow::createTabWidgets(){
     TabWidget *tabWidget = new TabWidget(ui->textTabGroup);
 
     ui->tabWidgetsSplitter->addWidget(tabWidget);
@@ -191,44 +283,31 @@ void MainWindow::on_openFile_triggered() {
                                          lastOpenedDir,
                                          QObject::tr("Все файлы (*.*)"));
 
-    if(filePath.isEmpty()) {
-        return;
-    }
-
-
-    for(TabWidget * tabWidget: tabWidgets){
-        for(TabPage * tabPage: tabWidget->tabs){
-            if(tabPage->fileinfo && tabPage->fileinfo->filePath() == filePath){
-                 activeTabWidget->setCurrentWidget(tabPage);
-
-                 return;
-            }
-        }
-    }
-
-    if(tabWidgets.isEmpty()) {
-        createTabWidgets();
-    }
-
-    activeTabWidget->createTab(filePath)->openFile();
+    openFileInWidgets(filePath);
 }
 
 void MainWindow::on_closeTab_triggered() {
-    const int closedTabIndex = activeTabWidget->currentIndex();
+    if(activeTabWidget) {
+        const int closedTabIndex = activeTabWidget->currentIndex();
 
-    if(activeTabWidget->getCurrentTab()->savingInProgress) {
-       return;
-    }
+        if(activeTabWidget->getCurrentTab()->savingInProgress) {
+           return;
+        }
 
-    QString pathClosedFile = activeTabWidget->closeTab(closedTabIndex);
+        QString pathClosedFile = activeTabWidget->closeTab(closedTabIndex);
 
-    if(!pathClosedFile.isEmpty()) {
-        setSettings("LastClosedFile", pathClosedFile);
+        if(!pathClosedFile.isEmpty()) {
+            setLastClosedFile(pathClosedFile);
+        }
+    } else {
+        exit(0);
     }
 }
 
 void MainWindow::on_closeEverythingTabs_triggered() {
-    activeTabWidget->closeAllTabs();
+    if(activeTabWidget) {
+        activeTabWidget->closeAllTabs();
+    }
 }
 
 void MainWindow::on_closeWindow_triggered() {
@@ -248,7 +327,9 @@ void MainWindow::on_newFile_triggered() {
         }
     }
 
-    activeTabWidget->createTab("")->getTextEditor()->setFocus();
+    if(activeTabWidget) {
+        activeTabWidget->createTab("")->getTextEditor()->setFocus();
+    }
 }
 
 void MainWindow::on_changeSideBar_toggled(bool value) {
@@ -264,41 +345,19 @@ void MainWindow::on_changeTextWrap_triggered(bool value) {
 }
 
 void MainWindow::on_save_triggered() {
-    activeTabWidget->getCurrentTab()->asyncSaveFile(SAVE);
+    if(activeTabWidget) {
+        activeTabWidget->getCurrentTab()->asyncSaveFile(SAVE);
+    }
 }
 
 void MainWindow::on_openClosedFile_triggered() {
-    const QString filePath = getSettings("LastClosedFile").toString();
+    const QString filePath = getLastClosedFile();
 
-    if(!filePath.isEmpty()) {
-        if(tabWidgets.isEmpty()) {
-            createTabWidgets();
-        }
-
-        for(TabWidget * tabWidget: tabWidgets){
-            for(TabPage * tabPage: tabWidget->tabs){
-                if(tabPage->fileinfo && tabPage->fileinfo->filePath() == filePath){
-                     activeTabWidget->setCurrentWidget(tabPage);
-
-                     return;
-                }
-            }
-        }
-
-        activeTabWidget->createTab(filePath)->openFile();
-    }
+    openFileInWidgets(filePath);
 }
 
 void MainWindow::on_exit_triggered() {
-    if(!tabWidgets.isEmpty()) {
-        for(TabWidget * tabWidget: tabWidgets){
-            for(TabPage * tabPage: tabWidget->tabs){
-                if(!tabPage->isSaved){
-                     tabPage->saveFile(SAVE);
-                }
-            }
-        }
-    }
+    saveEverythingFiles();
 
     exit(0);
 }
@@ -329,6 +388,7 @@ void MainWindow::setDefaultSettings() {
    settings.setValue("IsTextWrap", false);
    settings.setValue("IsShowSideBar", true);
    settings.setValue("IsShowStatusBar", true);
+   settings.setValue("OnAutoSave", true);
 
    settings.setValue("TabWidth", 4);
    settings.setValue("CursorWidth", 2);
@@ -338,4 +398,18 @@ void MainWindow::setDefaultSettings() {
    settings.setValue("WindowY", 50);
 
    settings.setValue("SideBarWidth", 300);
+}
+
+void MainWindow::on_saveAs_triggered() {
+    if(activeTabWidget) {
+        activeTabWidget->getCurrentTab()->saveFile(SAVE_AS);
+    }
+}
+
+void MainWindow::on_autoSave_triggered(bool checked) {
+    setSettings("OnAutoSave", checked);
+}
+
+void MainWindow::on_saveEverything_triggered() {
+    saveEverythingFiles();
 }

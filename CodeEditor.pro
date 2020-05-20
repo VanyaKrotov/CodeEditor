@@ -18,6 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     filereader.cpp \
     filewriter.cpp \
+    highlighter.cpp \
     main.cpp \
     mainwindow.cpp \
     tabpage.cpp \
@@ -27,6 +28,7 @@ SOURCES += \
 HEADERS += \
     filereader.h \
     filewriter.h \
+    highlighter.h \
     mainwindow.h \
     tabpage.h \
     tabwidget.h \

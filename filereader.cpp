@@ -10,23 +10,14 @@ void FileReader::setProps(QString filePath){
 
 void FileReader::readFile(){
     QFile file(filePath);
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text) && (file.exists()))
-    {
+
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text) && (file.exists())) {
         QTextStream stream(&file);
 
-        stream.setCodec(QTextCodec::codecForName("UTF-8"));
+//        stream.setCodec(QTextCodec::codecForName("UTF-8"));
+        QString content = stream.readAll();
 
-//        const int maxCount = file.size() / 2 / 100;
-//        int counReadSimbols = 0;
-
-        emit setLineFileReading(stream.readAll());
-//        while(!stream.atEnd()){
-//            QString line = stream.readLine();
-//            counReadSimbols += line.length();
-
-//            emit setLineFileReading(line);
-//            emit setStateReading(counReadSimbols / maxCount);
-//        }
+        emit setLineFileReading(content);
 
         file.flush();
         file.close();

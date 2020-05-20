@@ -12,6 +12,7 @@
 #include "filereader.h"
 #include "filewriter.h"
 #include "texteditor.h"
+#include "highlighter.h"
 
 #define CONFIGURATION_FILE "configurations.conf"
 #define SAVE false
@@ -40,9 +41,11 @@ public slots:
     void setLineFile(QString line);
     void finishedFileOpen();
     void finishedFileSave(QString pathSaved);
+    void setSaved(const bool value);
 
 private:
     TextEditor *editor;
+    Highlighter *highlighter;
 
     QThread fileReadThread;
     FileReader fileReader;

@@ -4,7 +4,8 @@ TabPage::TabPage(QFileInfo *fileInfo, QWidget *parent) : QWidget(parent) {
     setLayout(new QVBoxLayout(this));
     layout()->setMargin(0);
 
-    editor = new TextEditor(&isSaved, this);
+    editor = new TextEditor(this);
+    highlighter = new Highlighter(editor->document());
 
     this->layout()->addWidget(editor);
 
@@ -32,9 +33,6 @@ TabPage::~TabPage(){
         editor->deleteLater();
     }
 
-    fileReader.deleteLater();
-    fileReadThread.deleteLater();
-
     delete fileinfo;
 }
 
@@ -47,8 +45,6 @@ TextEditor *TabPage::getTextEditor() {
 }
 
 void TabPage::openFile(){
-    editor->setDisabled(true);
-
     fileReader.setProps(fileinfo->filePath());
     fileReadThread.start();
 }
@@ -71,15 +67,12 @@ void TabPage::saveFile(const bool saveType) {
         return;
     }
 
-    editor->setDisabled(true);
     savingInProgress = true;
 
     QFile file(filePath);
 
     if(file.open(QIODevice::WriteOnly | QIODevice::Text)){
         QTextStream writeStream(&file);
-
-        writeStream.setCodec(QTextCodec::codecForName("UTF-8"));
 
         writeStream << editor->toPlainText();
 
@@ -88,6 +81,10 @@ void TabPage::saveFile(const bool saveType) {
     }
 
     savingInProgress = false;
+    fileinfo = new QFileInfo(filePath);
+    setSaved(true);
+
+    emit updateTabData(this);
 }
 
 void TabPage::asyncSaveFile(const bool saveType) {
@@ -108,7 +105,6 @@ void TabPage::asyncSaveFile(const bool saveType) {
         return;
     }
 
-    editor->setDisabled(true);
     savingInProgress = true;
 
     fileWriter.setProps(editor, filePath);
@@ -119,12 +115,11 @@ void TabPage::setLineFile(QString line){
     editor->setPlainText(line);
 }
 
-void TabPage::finishedFileOpen(){
-    editor->setDisabled(false);
+void TabPage::finishedFileOpen() {
     editor->moveCursor(QTextCursor::Start);
     editor->setFocus();
 
-    isSaved = true;
+    setSaved(true);
 }
 
 void TabPage::finishedFileSave(QString pathSaved){
@@ -132,8 +127,12 @@ void TabPage::finishedFileSave(QString pathSaved){
     editor->setFocus();
 
     fileinfo = new QFileInfo(pathSaved);
-    isSaved = true;
+    setSaved(true);
     savingInProgress = false;
 
     emit updateTabData(this);
+}
+
+void TabPage::setSaved(const bool value) {
+    isSaved = value;
 }
