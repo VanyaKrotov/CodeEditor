@@ -1,26 +1,27 @@
 #ifndef LINENUMBERAREA_H
 #define LINENUMBERAREA_H
+
 #include <QWidget>
-#include <editor.h>
+#include "texteditor.h"
 
-//class LineNumberArea : public QWidget
-//{
-//public:
-//    LineNumberArea(Editor *editor) : QWidget(editor) {
-//        editor = editor;
-//    }
+class LineNumberArea : public QWidget
+ {
+ public:
+     LineNumberArea(TextEditor *editor) : QWidget(editor) {
+         codeEditor = editor;
+     }
 
-//    QSize sizeHint() const override {
-//        return QSize(editor->lineNumberAreaWidth(), 0);
-//    }
+     QSize sizeHint() const {
+         return QSize(codeEditor->lineNumberAreaWidth(), 0);
+     }
 
-//protected:
-//    void paintEvent(QPaintEvent *event) override {
-//        editor->lineNumberAreaPaintEvent(event);
-//    }
+ protected:
+     void paintEvent(QPaintEvent *event) {
+         codeEditor->lineNumberAreaPaintEvent(event);
+     }
 
-//private:
-//    Editor *editor;
-//};
+ private:
+     TextEditor *codeEditor;
+};
 
 #endif // LINENUMBERAREA_H

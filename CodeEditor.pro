@@ -23,7 +23,8 @@ SOURCES += \
     mainwindow.cpp \
     tabpage.cpp \
     tabwidget.cpp \
-    texteditor.cpp
+    texteditor.cpp \
+    linenumberarea.cpp
 
 HEADERS += \
     filereader.h \
@@ -32,7 +33,8 @@ HEADERS += \
     mainwindow.h \
     tabpage.h \
     tabwidget.h \
-    texteditor.h
+    texteditor.h \
+    linenumberarea.h
 
 FORMS += \
     mainwindow.ui

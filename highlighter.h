@@ -2,6 +2,7 @@
 #define HIGHLIGHTER_H
 
 #include <QSyntaxHighlighter>
+#include <QTextCharFormat>
 
 class Highlighter : public QSyntaxHighlighter
 {
@@ -25,7 +26,7 @@ private:
     QTextCharFormat keywordFormat;
     QTextCharFormat classFormat;
     QTextCharFormat singleLineCommentFormat;
-    QTextCharFormat multilineLineCommentFormat;
+    QTextCharFormat multiLineCommentFormat;
     QTextCharFormat quotationFormat;
     QTextCharFormat functionFormat;
 };
