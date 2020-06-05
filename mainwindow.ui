@@ -19,7 +19,6 @@
   <property name="font">
    <font>
     <family>Microsoft YaHei UI</family>
-    <pointsize>-1</pointsize>
    </font>
   </property>
   <property name="windowTitle">
@@ -28,7 +27,7 @@
   <property name="styleSheet">
    <string notr="true">* {
 	color: #cfcfcf;
-	font-size: 12px;
+	/*font-size: 12px;*/
 	font-family: &quot;Microsoft YaHei UI&quot;;
 	background: #38393b;
 	border: none;
@@ -68,7 +67,6 @@ QTabWidget::pane,
 QProgressBar,
 QMenu,
 QTabWidget:tab,
-#textTabGroup,
 QMenuBar::item:pressed,
 QMenuBar::item:selected,
  #textTabGroup QTabBar::tab:!selected,
@@ -102,9 +100,6 @@ QLineEdit ,
 	color: #fefefe;
 }
 
-QTabBar::tab:!selected{
-	background: #38393b ;
-}
 
 QTabBar::tab, 
 #optionLabel,
@@ -125,7 +120,8 @@ QTabBar::tab,
 }
 
 #textTabGroup  QTabBar::tab:selected,
-QMenu::item:selected {
+QMenu::item:selected,
+QTabBar::tab:!selected {
 	background: #38393b;
 }
 
@@ -156,7 +152,7 @@ QMenu{
 }
 
 QPlainTextEdit {
-	font: 10pt &quot;MS Reference Sans Serif&quot;;
+	font:  &quot;MS Reference Sans Serif&quot;;
 }
 
 /*
@@ -209,7 +205,10 @@ QSplitter::handle{
 
 #cursorStateButton {
 	text-align: right;
-}	</string>
+}	
+
+
+</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -377,7 +376,7 @@ QSplitter::handle{
                  <x>0</x>
                  <y>0</y>
                  <width>903</width>
-                 <height>458</height>
+                 <height>460</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -459,7 +458,7 @@ QSplitter::handle{
                  <x>0</x>
                  <y>0</y>
                  <width>903</width>
-                 <height>458</height>
+                 <height>460</height>
                 </rect>
                </property>
                <attribute name="label">
@@ -927,12 +926,26 @@ QSplitter::handle{
       <addaction name="action_22"/>
       <addaction name="action_23"/>
      </widget>
+     <widget class="QMenu" name="menu_9">
+      <property name="title">
+       <string>Размер текста</string>
+      </property>
+      <addaction name="textZoomIn"/>
+      <addaction name="textZoomOut"/>
+     </widget>
+     <widget class="QMenu" name="menu_10">
+      <property name="title">
+       <string>Интерфейс</string>
+      </property>
+      <addaction name="interfaceZoomIn"/>
+      <addaction name="interfaceZoomOut"/>
+     </widget>
      <addaction name="changeStatusBar"/>
      <addaction name="changeSideBar"/>
      <addaction name="menu_7"/>
      <addaction name="separator"/>
-     <addaction name="action_25"/>
-     <addaction name="action_26"/>
+     <addaction name="menu_9"/>
+     <addaction name="menu_10"/>
      <addaction name="action_27"/>
     </widget>
     <addaction name="action_11"/>
@@ -1282,11 +1295,6 @@ QSplitter::handle{
     <string>Справа</string>
    </property>
   </action>
-  <action name="action_25">
-   <property name="text">
-    <string>Увеличить</string>
-   </property>
-  </action>
   <action name="action_26">
    <property name="text">
     <string>Уменьшить</string>
@@ -1321,6 +1329,38 @@ QSplitter::handle{
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+T</string>
+   </property>
+  </action>
+  <action name="textZoomIn">
+   <property name="text">
+    <string>Увеличить</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+=</string>
+   </property>
+  </action>
+  <action name="textZoomOut">
+   <property name="text">
+    <string>Уменьшить</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+-</string>
+   </property>
+  </action>
+  <action name="interfaceZoomIn">
+   <property name="text">
+    <string>Увеличить</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+=</string>
+   </property>
+  </action>
+  <action name="interfaceZoomOut">
+   <property name="text">
+    <string>Уменьшить</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+-</string>
    </property>
   </action>
  </widget>

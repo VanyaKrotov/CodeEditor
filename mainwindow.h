@@ -56,11 +56,15 @@ private slots:
     void on_exit_triggered();
     void setActiveTabWidget(TabWidget * activeWidget);
     void setActiveTreeWidget(QTreeWidget * activeWidget);
-    void setStatusBarColAndRow(const int col, const int row, const int select);
+    void setStatusBarColAndRow(CursorInfoMessage cursorState);
     void on_saveAs_triggered();
     void on_autoSave_triggered(bool checked);
 
     void on_saveEverything_triggered();
+
+    void on_textZoomIn_triggered();
+
+    void on_textZoomOut_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -86,6 +90,9 @@ private:
 
     void setStateStatusBar(bool state);
     void setStateSideBar(bool state);
+
+    void closeTabWidget(const int index);
+    void saveInConfigOpenedFile();
 
 };
 #endif // MAINWINDOW_H

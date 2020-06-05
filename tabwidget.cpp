@@ -42,8 +42,8 @@ void TabWidget::tabMoved(const int from, const int to) {
     tabs.swapItemsAt(from, to);
 }
 
-void TabWidget::setStatusBarDataSlot(const int col, const int row, const int select) {
-    emit setStatusBarData(col, row, select);
+void TabWidget::setStatusBarDataSlot(CursorInfoMessage cursorState) {
+   emit setStatusBarData(cursorState);
 }
 
 QString TabWidget::closeTab(const int &tabIndex){
@@ -77,6 +77,7 @@ QString TabWidget::closeTab(const int &tabIndex){
 
         delete tabs[tabIndex];
         tabs.removeAt(tabIndex);
+
     } catch (...) {
         return nullptr;
     }

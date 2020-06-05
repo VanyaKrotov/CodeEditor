@@ -17,7 +17,7 @@ TextEditor::TextEditor(QWidget *parent): QPlainTextEdit(parent) {
     connect(this, &TextEditor::cursorPositionChanged, this, &TextEditor::onChangeCursor);
     connect(this, &TextEditor::textChanged, this, &TextEditor::onTextChanged);
 
-    connect(this, SIGNAL(changeCursorPosition(int, int, int)), parent->parent(), SLOT(setStatusBarDataSlot(int, int, int)));
+    connect(this, SIGNAL(changeCursorPosition(CursorInfoMessage)), parent->parent(), SLOT(setStatusBarDataSlot(CursorInfoMessage)));
     connect(this, SIGNAL(inFocus()), parent->parent(), SLOT(setActiveThisWidget()));
     connect(this, SIGNAL(setSaved(const bool)), parent, SLOT(setSaved(const bool)));
 
@@ -28,7 +28,14 @@ TextEditor::TextEditor(QWidget *parent): QPlainTextEdit(parent) {
      updateLineNumberAreaWidth(0);
      highlightCurrentLine();
 
-    emit changeCursorPosition(0, 0, 0);
+//     QFont font = this->font();
+
+//     font.setPixelSize(13);
+
+//     setFont(font);
+
+    CursorInfoMessage cursorState;
+    emit changeCursorPosition(cursorState);
 }
 
 TextEditor::~TextEditor() {
@@ -46,14 +53,17 @@ void TextEditor::lineNumberAreaPaintEvent(QPaintEvent *event) {
     int blockNumber = block.blockNumber();
     int top = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
     int bottom = top + (int) blockBoundingRect(block).height();
+    QFont font = painter.font();
 
+    font.setPixelSize(fontInfo().pixelSize());
+    painter.setFont(font);
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
             const int lighterText = block.blockNumber() == textCursor().blockNumber() ? 150 : 100;
             QString number = QString::number(blockNumber + 1);
 
             painter.setPen(QColor(Qt::darkGray).lighter(lighterText));
-            painter.drawText(0, top, lineNumberArea->width() - 3, fontMetrics().height(), Qt::AlignCenter, number);
+            painter.drawText(0, top, lineNumberArea->width() - 10, fontMetrics().height(), Qt::AlignRight, number);
         }
 
         block = block.next();
@@ -84,7 +94,8 @@ void TextEditor::focusInEvent(QFocusEvent *e) {
 }
 
 void TextEditor::focusOutEvent(QFocusEvent *e) {
-    emit changeCursorPosition(0, 0, 0);
+    CursorInfoMessage cursorState;
+    emit changeCursorPosition(cursorState);
     emit outFocus();
 
     QPlainTextEdit::focusOutEvent(e);
@@ -111,7 +122,12 @@ CursorState TextEditor::getCursorState() {
 void TextEditor::onChangeCursor() {
     auto [col, row, selected] = getCursorState();
 
-    emit changeCursorPosition(col, row, selected);
+    CursorInfoMessage cursorState;
+    cursorState.column = col;
+    cursorState.line = row;
+    cursorState.selected = selected;
+
+    emit changeCursorPosition(cursorState);
 }
 
 void TextEditor::onTextChanged() {

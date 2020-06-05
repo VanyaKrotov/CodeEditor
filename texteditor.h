@@ -8,6 +8,8 @@
 #include <QTextBlock>
 #include <QColor>
 
+#include "cursorinfomessage.h"
+
 #define CONFIGURATION_FILE "configurations.conf"
 
 
@@ -49,7 +51,7 @@ public slots:
     void updateLineNumberArea(const QRect &, int);
 
 signals:
-    void changeCursorPosition(const int col, const int row, const int select);
+    void changeCursorPosition(CursorInfoMessage cursorState);
     void inFocus();
     void outFocus();
     void setSaved(const bool value);

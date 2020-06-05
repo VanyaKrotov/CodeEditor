@@ -7,6 +7,7 @@
 
 #include "tabpage.h"
 #include "texteditor.h"
+#include "cursorinfomessage.h"
 
 #define CONFIGURATION_FILE "configurations.conf"
 #define SAVE false
@@ -29,7 +30,7 @@ public:
     void openFile(QString path);
 
 signals:
-    void setStatusBarData(const int col, const int row, const int select);
+    void setStatusBarData(CursorInfoMessage cursorState);
     void setActive(TabWidget * activeWidget);
 
 public slots:
@@ -37,7 +38,7 @@ public slots:
     void removeTabInWidget();
     void updateTabData(TabPage * tab);
     void tabMoved(const int from, const int to);
-    void setStatusBarDataSlot(const int col, const int row, const int select);
+    void setStatusBarDataSlot(CursorInfoMessage cursorState);
     void setActiveThisWidget();
 };
 

@@ -27,6 +27,7 @@ SOURCES += \
     linenumberarea.cpp
 
 HEADERS += \
+    cursorinfomessage.h \
     filereader.h \
     filewriter.h \
     highlighter.h \

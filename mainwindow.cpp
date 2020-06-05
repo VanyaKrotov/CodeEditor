@@ -24,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent)
     const int windowWidth = getSettings("WindowWidth").toInt();
     const int windowHeight = getSettings("WindowHeight").toInt();
 
+    QList<QVariant> fileOpenList = getSettings("OpenedFiles").toList();
+
     setGeometry(x, y, windowWidth, windowHeight);
 
     ui->changeStatusBar->setChecked(isShowStatusBar);
@@ -41,9 +43,20 @@ MainWindow::MainWindow(QWidget *parent)
 
         ui->golSplitter->setSizes(QList<int>({sideBarWidth, restWidth}));
     }
+
+    for (QVariant item: fileOpenList) {
+        createTabWidgets();
+        for(QVariant filePath: item.toList()) {
+            activeTabWidget->createTab(filePath.toString())->openFile();
+        }
+    }
+
 }
 
 MainWindow::~MainWindow() {
+    saveEverythingFiles();
+    saveInConfigOpenedFile();
+
     setSettings("SideBarWidth", ui->optionsTabWidget->width());
     setSettings("WindowWidth", width());
     setSettings("WindowHeight", height());
@@ -70,9 +83,11 @@ void MainWindow::openFileInWidgets(QString filePath) {
         return;
     }
 
+
     if(tabWidgets.isEmpty()) {
         createTabWidgets();
     }
+
 
     TabPage *tabWithOpenFile = checkOpenedFileInWidgets(filePath);
 
@@ -248,6 +263,31 @@ void MainWindow::setStateSideBar(bool state){
     }
 }
 
+void MainWindow::closeTabWidget(const int index) {
+    tabWidgets[index]->deleteLater();
+    tabWidgets.removeAt(index);
+
+    activeTabWidget = !tabWidgets.isEmpty() ? tabWidgets[0] : nullptr;
+}
+
+void MainWindow::saveInConfigOpenedFile() {
+    QList<QVariant> openedFiles;
+    for (TabWidget *tabWidget: tabWidgets) {
+        QStringList filesPath;
+        for(TabPage* tabPage: tabWidget->tabs) {
+            if(tabPage->fileinfo && !tabPage->fileinfo->filePath().isEmpty()) {
+                filesPath.append(tabPage->fileinfo->filePath());
+            }
+        }
+
+        if(!filesPath.isEmpty()) {
+            openedFiles.append(QVariant(filesPath));
+        }
+    }
+
+    setSettings("OpenedFiles", openedFiles);
+}
+
 // Слоты
 void MainWindow::on_openDir_triggered() {
     QString lastOpenedDir = getSettings("LastOpenedDir").toString();
@@ -299,8 +339,16 @@ void MainWindow::on_closeTab_triggered() {
         if(!pathClosedFile.isEmpty()) {
             setLastClosedFile(pathClosedFile);
         }
+
+        if(activeTabWidget && activeTabWidget->tabs.isEmpty()) {
+            int findIndex = tabWidgets.indexOf(activeTabWidget);
+
+            if(findIndex != -1) {
+                closeTabWidget(findIndex);
+            }
+        }
     } else {
-        exit(0);
+        on_exit_triggered();
     }
 }
 
@@ -357,8 +405,6 @@ void MainWindow::on_openClosedFile_triggered() {
 }
 
 void MainWindow::on_exit_triggered() {
-    saveEverythingFiles();
-
     exit(0);
 }
 
@@ -370,11 +416,12 @@ void MainWindow::setActiveTreeWidget(QTreeWidget *activeWidget) {
     activeTreeWidget = activeWidget;
 }
 
-void MainWindow::setStatusBarColAndRow(const int col, const int row, const int select) {
+void MainWindow::setStatusBarColAndRow(CursorInfoMessage cursorState) {
+    auto [column, line, selected] = cursorState;
     QString buttonLabel =
-            "Строка: " + QString::number(col) +
-            ", Столбец: " +  QString::number(row) +
-            (select ? " (выделено: " + QString::number(select) + ")" : "");
+            "Строка: " + QString::number(column) +
+            ", Столбец: " +  QString::number(line) +
+            (selected ? " (выделено: " + QString::number(selected) + ")" : "");
 
     ui->cursorStateButton->setText(buttonLabel);
 }
@@ -392,6 +439,7 @@ void MainWindow::setDefaultSettings() {
 
    settings.setValue("TabWidth", 4);
    settings.setValue("CursorWidth", 2);
+   settings.setValue("InterfaceZoom", 2);
    settings.setValue("WindowWidth", 900);
    settings.setValue("WindowHeight", 500);
    settings.setValue("WindowX", 50);
@@ -412,4 +460,16 @@ void MainWindow::on_autoSave_triggered(bool checked) {
 
 void MainWindow::on_saveEverything_triggered() {
     saveEverythingFiles();
+}
+
+void MainWindow::on_textZoomIn_triggered() {
+    if(activeTabWidget) {
+       activeTabWidget->getCurrentTab()->getTextEditor()->zoomIn();
+    }
+}
+
+void MainWindow::on_textZoomOut_triggered() {
+    if(activeTabWidget) {
+       activeTabWidget->getCurrentTab()->getTextEditor()->zoomOut();
+    }
 }
